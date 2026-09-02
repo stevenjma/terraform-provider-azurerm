@@ -6,12 +6,14 @@ package client
 import (
 	"fmt"
 
+	"github.com/hashicorp/go-azure-sdk/resource-manager/durabletask/2025-11-01/retentionpolicies"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/durabletask/2025-11-01/schedulers"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/common"
 )
 
 type Client struct {
-	SchedulersClient *schedulers.SchedulersClient
+	RetentionPoliciesClient *retentionpolicies.RetentionPoliciesClient
+	SchedulersClient        *schedulers.SchedulersClient
 }
 
 func NewClient(o *common.ClientOptions) (*Client, error) {
@@ -21,7 +23,14 @@ func NewClient(o *common.ClientOptions) (*Client, error) {
 	}
 	o.Configure(schedulersClient.Client, o.Authorizers.ResourceManager)
 
+	retentionPoliciesClient, err := retentionpolicies.NewRetentionPoliciesClientWithBaseURI(o.Environment.ResourceManager)
+	if err != nil {
+		return nil, fmt.Errorf("building RetentionPolicies client: %+v", err)
+	}
+	o.Configure(retentionPoliciesClient.Client, o.Authorizers.ResourceManager)
+
 	return &Client{
-		SchedulersClient: schedulersClient,
+		RetentionPoliciesClient: retentionPoliciesClient,
+		SchedulersClient:        schedulersClient,
 	}, nil
 }
